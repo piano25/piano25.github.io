@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+	border:1px solid #d4d4d4;
+	background-color: #f1f1f1;
+}
+</style>
+</head>
+
+<body onload="startGame()">
+
+<script>
+var gInterval = 20;
+var gObjNum = 300;
+var gSize = 600;
+var gCOR = 1;
+var gSpeedMax=5;
+var gRadius=5;
+var gMoveNum=gObjNum;
+var gVirusLast=200;
+
+var myObjects = [];
+var myContext;
+
+var myGameArea = {
+    canvas : document.createElement("canvas"),
+    start : function() {
+        this.canvas.width = gSize;
+        this.canvas.height = gSize;
+        myContext = this.canvas.getContext("2d");
+        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        this.frameNo=0;
+        
+        clearInterval(this.interval);
+        this.interval = setInterval(updateGame, gInterval);
+         //document.addEventListerner('keydown', keyDownHandler,false);
+        //document.addEventListerner('keyup', keyUpHandler, false);
+    },
+    clear : function() {
+        myContext.clearRect(0,0,this.canvas.width, this.canvas.height);
+    }
+}
+
+function circle(x,y,r, t=0) {
+    // '#FD0'; '#6C0'; '#09F'; '#F30';
+  
+    //if(t==0) myContext.fillStyle="rgba(100, 100, 150, 1)"
+    //else if(t==1) myContext.fillStyle="#CC0"
+    //else myContext.fillStyle="pink"
+    
+    if(t==0) myContext.fillStyle="rgba(170, 170, 255, 1)"
+    else if(t==1) myContext.fillStyle="rgba(255, 0, 0, 1)"
+    else myContext.fillStyle="rgba(255, 100, 100, .5)"
+    
+    
+    myContext.beginPath();
+    myContext.arc(x, y, r, 0, 2 * Math.PI);
+    myContext.closePath();
+    myContext.fill();
+}
+
+function object(type, x, y, vx, vy, ax=0, ay=0, r=gRadius) {
+    this.type = type;
+    this.x = x;
+    this.y = y;
+    this.vx = vx;
+    this.vy = vy;
+    this.ax = ax;
+    this.ay = ay;
+    this.move = true;
+    this.recovery=0;
+    
+    this.update = function() {
+        if(this.type==1) {
+            if(this.recovery==gVirusLast) this.type=2;
+            else this.recovery+=1;
+        }
+        
+        if(this.move==false) return;
+        
+        if(this.x < 0) { this.x*=-1; this.vx *=-gCOR; this.vy *= gCOR; }
+        if(this.y < 0) { this.y*=-1; this.vx *= gCOR; this.vy *=-gCOR; }
+        if(this.x > gSize) { this.x=2*gSize-this.x; this.vx *=-gCOR; this.vy *= gCOR; }
+        if(this.y > gSize) { this.y=2*gSize-this.y; this.vx *= gCOR; this.vy *=-gCOR; }
+        
+        this.vx += this.ax; this.ax=0;
+        this.vy += this.ay; this.ay=0;
+        
+        this.x += this.vx;
+        this.y += this.vy;
+    }
+    
+    this.draw = function() {
+        circle(this.x, this.y, r, this.type);
+    }
+}
+
+function startGame() {
+	myObjects=[];
+	myGameArea.start();
+    for (i = 0; i < gObjNum; i += 1) {
+        x=Math.random()*gSize;
+        y=Math.random()*gSize;
+        vx=(Math.random()-.5)*gSpeedMax;
+        vy=(Math.random()-.5)*gSpeedMax;
+        type=0; //=Math.floor(Math.random() * 3); 
+        myObjects.push(new object(type, x,y,vx, vy));
+    }
+    console.log("start!");
+}
+
+function restart() {
+    for(i=0;i<gObjNum;i+=1){
+        myObjects[i].type=0;
+        myObjects[i].recovery=0;
+    }
+}
+
+function infect() {
+    myObjects[Math.floor(Math.random() * gObjNum)].type=1;
+}
+
+function movePlus(n) {
+    for(i=0;i<n;i+=1) {
+        if(gMoveNum<gObjNum){
+            myObjects[gMoveNum].move=true;
+            gMoveNum+=1;
+        }
+    }
+}
+
+function moveMinus(n) {
+    for(i=0;i<n;i+=1) {
+        if(gMoveNum>0){
+            myObjects[gMoveNum-1].move=false;
+            gMoveNum-=1;
+        }
+    }
+}
+
+function updateGame() {
+    myGameArea.clear();
+    for(i=0; i<gObjNum-1; i+=1) {
+        for(j=i+1; j<gObjNum; j+=1) {
+            dx=(myObjects[i].x-myObjects[j].x);
+            dy=(myObjects[i].y-myObjects[j].y);
+            if(dx*dx+dy*dy < 4*gRadius*gRadius){
+                if(myObjects[i].type==1 && myObjects[j].type==0){
+                    myObjects[j].type=1;
+                }
+                else if(myObjects[i].type==0 && myObjects[j].type==1){
+                    myObjects[i].type=1;
+                }
+            }
+        }
+    }
+    
+    for(i=0; i<gObjNum; i+=1) {
+        myObjects[i].update();
+        myObjects[i].draw();
+    }
+    //console.log( (myObjects[0].vx/ myObjects[0].vy), 
+    //            myObjects[0].vx, myObjects[0].vy);
+}
+
+</script>
+<br>
+<button onmouseup="restart()">restart</button>
+<button onmouseup="infect()">infect+1</button>
+<button onmouseup="moveMinus(10)">self-isolation +10</button>
+<button onmouseup="moveMinus(100)">self-isolation +100</button>
+<button onmouseup="movePlus(10)">move+10</button>
+</body>
+</html>
