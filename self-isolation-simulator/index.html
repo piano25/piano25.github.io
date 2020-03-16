@@ -91,19 +91,23 @@ function object(type, x, y, vx, vy, ax=0, ay=0, r=gRadius) {
         if(this.move==false) {
             this.x +=Math.random()-.5;
             this.y +=Math.random()-.5;
-            return;
+            if(this.x<0) this.x=0;
+            if(this.y<0) this.y=0;
+            if(this.x>gSize) this.x=gSize;
+            if(this.y>gSize) this.y=gSize;
         }
-        
-        if(this.x < 0) { this.x*=-1; this.vx *=-gCOR; this.vy *= gCOR; }
-        if(this.y < 0) { this.y*=-1; this.vx *= gCOR; this.vy *=-gCOR; }
-        if(this.x > gSize) { this.x=2*gSize-this.x; this.vx *=-gCOR; this.vy *= gCOR; }
-        if(this.y > gSize) { this.y=2*gSize-this.y; this.vx *= gCOR; this.vy *=-gCOR; }
-        
-        this.vx += this.ax; this.ax=0;
-        this.vy += this.ay; this.ay=0;
-        
-        this.x += this.vx;
-        this.y += this.vy;
+        else { // move
+            if(this.x < 0) { this.x*=-1; this.vx *=-gCOR; this.vy *= gCOR; }
+            if(this.y < 0) { this.y*=-1; this.vx *= gCOR; this.vy *=-gCOR; }
+            if(this.x > gSize) { this.x=2*gSize-this.x; this.vx *=-gCOR; this.vy *= gCOR; }
+            if(this.y > gSize) { this.y=2*gSize-this.y; this.vx *= gCOR; this.vy *=-gCOR; }
+            
+            this.vx += this.ax; this.ax=0;
+            this.vy += this.ay; this.ay=0;
+            
+            this.x += this.vx;
+            this.y += this.vy;
+        }
     }
     
     this.draw = function() {
