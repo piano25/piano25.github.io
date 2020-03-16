@@ -19,14 +19,14 @@ var gSize = 600;
 var gCOR = 1;
 var gSpeedMax=5;
 var gRadius=5;
-var gMoveNum=gObjNum;
+var gMoveNum=100;
 var gVirusLast=200;
 
 var myObjects = [];
 var myContext;
 var counter=[gObjNum,0,0];
 
-var colorHealthy="rgba(170, 230, 200, 1)";
+var colorHealthy="rgba(150, 230, 220, 1)";
 var colorSick="rgba(255, 0, 0, 1)";
 var colorRecovered="rgba(255, 100, 100, .4)"
 
@@ -122,6 +122,10 @@ function startGame() {
         type=0; //=Math.floor(Math.random() * 3); 
         myObjects.push(new object(type, x,y,vx, vy));
     }
+    for (i = gMoveNum; i < gObjNum; i += 1) {
+        myObjects[i].move=false;
+    }
+    
     console.log("start!");
 }
 
@@ -212,10 +216,11 @@ function updateGame() {
 
 </script>
 <br>
-<button onmouseup="restart()">restart</button>
 <button onmouseup="moveMinus(100)">move -100</button>
 <button onmouseup="moveMinus(10)">move -10</button>
 <button onmouseup="movePlus(20)">move +20</button>
+<button onmouseup="movePlus(100)">move +100</button>
+<button onmouseup="restart()">reset</button>
 <button onmouseup="infect()">infect +1</button>
 </body>
 </html>
